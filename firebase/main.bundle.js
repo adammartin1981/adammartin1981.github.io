@@ -355,14 +355,14 @@ module.exports = "<p>{{ title }}</p>\n<p>{{ message }}</p>\n<button type=\"butto
 /***/ 1135:
 /***/ function(module, exports) {
 
-module.exports = "<div (click)=\"editClick()\">\n  <button md-icon-button\n          color='accent'\n          (click)=\"deleteClick()\"><md-icon>delete</md-icon>\n  </button>\n  {{ fireItem.date }}\n</div>"
+module.exports = "<div (click)=\"editClick()\">\n\n  <h4>\n    <button md-icon-button\n              color='accent'\n              (click)=\"deleteClick()\"><md-icon>delete</md-icon>\n    </button>\n    {{ fireItem.date }} - {{ fireItem.name }}</h4>\n  <p>{{ fireItem.details }}</p>\n</div>"
 
 /***/ },
 
 /***/ 1136:
 /***/ function(module, exports) {
 
-module.exports = "<form [formGroup]=\"group\" (ngSubmit)=\"submit()\">\n    <md-input-container class=\"example-full-width\" >\n      <input mdInput placeholder=\"Text\" formControlName=\"date\" />\n    </md-input-container>\n\n    <div style=\"margin: auto\">\n        <button type=\"submit\"\n                md-raised-button\n                [disabled]=\"!group.valid\"\n        >OK</button>\n\n        <button type=\"button\"\n                md-button\n                (click)=\"close()\"\n        >Cancel</button>\n    </div>\n</form>\n"
+module.exports = "<form [formGroup]=\"group\" (ngSubmit)=\"submit()\">\n    <md-input-container class=\"example-full-width\" *ngFor=\"let key of keys\" >\n      <input mdInput placeholder=\"PH: {{key}}\" [formControlName]=\"key\" />\n    </md-input-container>\n\n\n    <div style=\"margin: auto\">\n        <button type=\"submit\"\n                md-raised-button\n                [disabled]=\"!group.valid\"\n        >OK</button>\n\n        <button type=\"button\"\n                md-button\n                (click)=\"close()\"\n        >Cancel</button>\n    </div>\n</form>\n"
 
 /***/ },
 
@@ -658,10 +658,19 @@ var FormDialogComponent = (function () {
         this.createForm();
     };
     FormDialogComponent.prototype.createForm = function () {
-        this.group = this.formBuilder.group({
-            date: [this.formData.date, __WEBPACK_IMPORTED_MODULE_2__angular_forms__["d" /* Validators */].required],
-            $key: this.formData.$key
+        var _this = this;
+        this.keys = Object.keys(this.formData).filter(function (key) {
+            if (key.indexOf('$') === -1) {
+                return true;
+            }
+            return false;
         });
+        var groupObject = {};
+        this.keys.forEach(function (key) {
+            groupObject[key] = _this.formData[key];
+        });
+        groupObject['$key'] = this.formData.$key;
+        this.group = this.formBuilder.group(groupObject);
     };
     FormDialogComponent.prototype.submit = function () {
         this.dialogRef.close(this.group.value);
@@ -675,7 +684,7 @@ var FormDialogComponent = (function () {
             template: __webpack_require__(1136),
             styles: [__webpack_require__(1126)]
         }), 
-        __metadata('design:paramtypes', [(typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_2__angular_forms__["e" /* FormBuilder */] !== 'undefined' && __WEBPACK_IMPORTED_MODULE_2__angular_forms__["e" /* FormBuilder */]) === 'function' && _a) || Object, (typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__angular_material__["a" /* MdDialogRef */] !== 'undefined' && __WEBPACK_IMPORTED_MODULE_1__angular_material__["a" /* MdDialogRef */]) === 'function' && _b) || Object])
+        __metadata('design:paramtypes', [(typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_2__angular_forms__["d" /* FormBuilder */] !== 'undefined' && __WEBPACK_IMPORTED_MODULE_2__angular_forms__["d" /* FormBuilder */]) === 'function' && _a) || Object, (typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__angular_material__["a" /* MdDialogRef */] !== 'undefined' && __WEBPACK_IMPORTED_MODULE_1__angular_material__["a" /* MdDialogRef */]) === 'function' && _b) || Object])
     ], FormDialogComponent);
     return FormDialogComponent;
     var _a, _b;
@@ -820,10 +829,29 @@ var FirebaseComponent = (function () {
     }
     FirebaseComponent.prototype.update = function (x) {
         var _this = this;
+        var newKeys;
         this.openForm(x).filter(function (result) { return result; }).subscribe(function (res) {
-            _this.data$.update(res.$key, {
-                date: res.date
+            newKeys = Object.keys(res).filter(function (k) {
+                return k.indexOf('$') === -1;
             });
+            console.log('UPDATE', res);
+            newKeys.forEach(function (key) {
+                console.log('DOING KEY', key);
+                _this.data$.update(res.$key, (_a = {},
+                    _a[key] = res[key],
+                    _a
+                ));
+                var _a;
+            });
+            // Object.keys(res).map((key) => {
+            //     console.log('RES', res.$key);
+            //     console.log('DATA:');
+            //     this.data$.update(res.$key, {
+            //         [key]: res[key]
+            //     });
+            //
+            // });
+            // this.data$.update(res.$key, res);
         });
     };
     FirebaseComponent.prototype.remove = function (x) {
@@ -831,7 +859,9 @@ var FirebaseComponent = (function () {
     };
     FirebaseComponent.prototype.add = function () {
         var newCustom = {
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            name: '',
+            details: ''
         };
         this.data$.push(newCustom);
     };
@@ -1125,7 +1155,7 @@ var AppModule = (function () {
             imports: [
                 __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["e" /* BrowserModule */],
                 __WEBPACK_IMPORTED_MODULE_2__angular_forms__["b" /* FormsModule */],
-                __WEBPACK_IMPORTED_MODULE_2__angular_forms__["f" /* ReactiveFormsModule */],
+                __WEBPACK_IMPORTED_MODULE_2__angular_forms__["e" /* ReactiveFormsModule */],
                 __WEBPACK_IMPORTED_MODULE_3__angular_http__["b" /* HttpModule */],
                 __WEBPACK_IMPORTED_MODULE_6_ng2_bootstrap__["a" /* ButtonsModule */],
                 __WEBPACK_IMPORTED_MODULE_6_ng2_bootstrap__["b" /* CollapseModule */],
